@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import express from "express";
+import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import axios from "axios";
 import cors from "cors";
@@ -14,11 +14,28 @@ app.use(cors());
 
 const JUDIT_API_KEY = process.env.JUDIT_API_KEY;
 
-app.post("/capture", async (req, res) => {
-  const { search_type, search_key } = req.body;
+type Search = {
+  search_type: string;
+  search_key: string;
+};
+
+type RequestData = {
+  request_id: string;
+  search: Search;
+  origin: string;
+  origin_id: string;
+  user_id: string;
+  status: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+};
+
+app.post("/capture", async (req: Request, res: Response) => {
+  const { search_type, search_key }: Search = req.body;
 
   try {
-    const response = await axios.post(
+    const response = await axios.post<RequestData>(
       "https://requests.prod.judit.io/requests",
       {
         search: {
@@ -28,7 +45,7 @@ app.post("/capture", async (req, res) => {
       },
       {
         headers: {
-          "api-key": JUDIT_API_KEY,
+          "api-key": process.env.JUDIT_API_KEY,
           "Content-Type": "application/json",
         },
       }
